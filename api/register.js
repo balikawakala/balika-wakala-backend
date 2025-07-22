@@ -1,23 +1,7 @@
+// api/register.js
 const TelegramBot = require('node-telegram-bot-api');
 const crypto = require('crypto');
-
-// Simple in-memory storage (replace with database for production)
-const users = new Map();
-
-function hashPassword(password) {
-  return crypto.createHash('sha256').update(password).digest('hex');
-}
-
-function formatPhoneNumber(phone) {
-  let cleaned = phone.replace(/\D/g, '');
-  if (cleaned.startsWith('255')) {
-    cleaned = '0' + cleaned.substring(3);
-  }
-  if (!cleaned.startsWith('0')) {
-    cleaned = '0' + cleaned;
-  }
-  return cleaned;
-}
+import { storage, hashPassword, formatPhoneNumber } from './lib/storage';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -66,7 +50,7 @@ export default async function handler(req, res) {
     }
 
     // Check if user exists
-    if (users.has(formattedPhone)) {
+    if (storage.users.has(formattedPhone)) {
       return res.status(400).json({ 
         success: false,
         error: 'Mtumiaji tayari yupo na namba hii ya simu' 
@@ -85,10 +69,11 @@ export default async function handler(req, res) {
       lastLogin: new Date().toISOString()
     };
 
-    users.set(formattedPhone, user);
+    storage.users.set(formattedPhone, user);
+    console.log(`✅ New user registered: ${fullName} (${formattedPhone})`);
 
     // Notify admin via Telegram
-    if (process.env.BOT_TOKEN) {
+    if (process.env.BOT_TOKEN && process.env.ADMIN_CHAT_ID) {
       try {
         const bot = new TelegramBot(process.env.BOT_TOKEN);
         const welcomeMessage = `
@@ -99,7 +84,7 @@ export default async function handler(req, res) {
 🌐 *Mtandao:* ${network.toUpperCase()}
 ⏰ *Wakati:* ${new Date().toLocaleString('sw-TZ', { timeZone: 'Africa/Dar_es_Salaam' })}
 
-📊 *Jumla ya Watumiaji:* ${users.size}
+📊 *Jumla ya Watumiaji:* ${storage.users.size}
 
 🌐 *Tovuti:* https://balikawakala.github.io
         `;
