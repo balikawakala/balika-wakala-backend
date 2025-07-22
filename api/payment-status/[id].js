@@ -1,5 +1,5 @@
-const pendingPayments = new Map();
-const payments = new Map();
+// api/payment-status/[id].js
+import { storage } from '../lib/storage';
 
 export default function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -13,7 +13,7 @@ export default function handler(req, res) {
   try {
     const { id: paymentId } = req.query;
     
-    const payment = pendingPayments.get(paymentId) || payments.get(paymentId);
+    const payment = storage.pendingPayments.get(paymentId) || storage.payments.get(paymentId);
     
     if (!payment) {
       return res.status(404).json({ 
