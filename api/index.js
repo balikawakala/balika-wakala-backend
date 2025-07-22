@@ -1,6 +1,5 @@
-const users = new Map();
-const payments = new Map();
-const pendingPayments = new Map();
+// api/index.js
+import { storage } from './lib/storage';
 
 export default function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -19,9 +18,9 @@ export default function handler(req, res) {
     paymentNumber: '0687537030 (Baraka Laizer)',
     github: 'https://github.com/balikawakala',
     frontend: 'https://balikawakala.github.io',
-    totalUsers: users.size,
-    pendingPayments: pendingPayments.size,
-    completedPayments: payments.size,
+    totalUsers: storage.users.size,
+    pendingPayments: storage.pendingPayments.size,
+    completedPayments: storage.payments.size,
     version: '1.0.0',
     platform: 'Vercel Serverless'
   });
