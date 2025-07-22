@@ -1,28 +1,6 @@
+// api/submit-payment.js
 const TelegramBot = require('node-telegram-bot-api');
-const crypto = require('crypto');
-
-// Storage
-const users = new Map();
-const pendingPayments = new Map();
-
-function formatPhoneNumber(phone) {
-  let cleaned = phone.replace(/\D/g, '');
-  if (cleaned.startsWith('255')) {
-    cleaned = '0' + cleaned.substring(3);
-  }
-  if (!cleaned.startsWith('0')) {
-    cleaned = '0' + cleaned;
-  }
-  return cleaned;
-}
-
-function formatCurrency(amount) {
-  return new Intl.NumberFormat('sw-TZ').format(amount) + ' TZS';
-}
-
-function generatePaymentId() {
-  return crypto.randomBytes(6).toString('hex').toUpperCase();
-}
+import { storage, formatPhoneNumber, formatCurrency, generatePaymentId } from './lib/storage';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -48,7 +26,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const user = Array.from(users.values()).find(u => u.id === userId);
+    const user = Array.from(storage.users.values()).find(u => u.id === userId);
     if (!user) {
       return res.status(404).json({ 
         success: false,
@@ -88,10 +66,11 @@ export default async function handler(req, res) {
       createdAt: new Date().toISOString()
     };
 
-    pendingPayments.set(paymentId, payment);
+    storage.pendingPayments.set(paymentId, payment);
+    console.log(`💰 Payment submitted: ${paymentId} - ${user.fullName} - ${formatCurrency(paymentAmount)}`);
 
     // Send notification to admin via Telegram
-    if (process.env.BOT_TOKEN) {
+    if (process.env.BOT_TOKEN && process.env.ADMIN_CHAT_ID) {
       try {
         const bot = new TelegramBot(process.env.BOT_TOKEN);
         const adminMessage = `
