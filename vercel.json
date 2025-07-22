@@ -1,9 +1,21 @@
 {
   "functions": {
-    "api/*.js": {
+    "api/register.js": {
       "maxDuration": 10
     },
-    "api/**/*.js": {
+    "api/login.js": {
+      "maxDuration": 10
+    },
+    "api/submit-payment.js": {
+      "maxDuration": 10
+    },
+    "api/test.js": {
+      "maxDuration": 10
+    },
+    "api/index.js": {
+      "maxDuration": 10
+    },
+    "api/balance/[userId].js": {
       "maxDuration": 10
     }
   },
@@ -11,7 +23,7 @@
     {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "https://balikawakala.github.io" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, OPTIONS" },
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
       ]
