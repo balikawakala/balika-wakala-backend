@@ -1,26 +1,5 @@
-const crypto = require('crypto');
-
-// Import users storage (in production, use a database)
-const users = new Map();
-
-function hashPassword(password) {
-  return crypto.createHash('sha256').update(password).digest('hex');
-}
-
-function formatPhoneNumber(phone) {
-  let cleaned = phone.replace(/\D/g, '');
-  if (cleaned.startsWith('255')) {
-    cleaned = '0' + cleaned.substring(3);
-  }
-  if (!cleaned.startsWith('0')) {
-    cleaned = '0' + cleaned;
-  }
-  return cleaned;
-}
-
-function formatCurrency(amount) {
-  return new Intl.NumberFormat('sw-TZ').format(amount) + ' TZS';
-}
+// api/login.js
+import { storage, hashPassword, formatPhoneNumber, formatCurrency } from './lib/storage';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -46,7 +25,10 @@ export default async function handler(req, res) {
     }
 
     const formattedPhone = formatPhoneNumber(phone);
-    const user = users.get(formattedPhone);
+    const user = storage.users.get(formattedPhone);
+    
+    console.log(`Login attempt for: ${formattedPhone}`);
+    console.log(`Total users in storage: ${storage.users.size}`);
     
     if (!user) {
       return res.status(401).json({ 
@@ -64,7 +46,9 @@ export default async function handler(req, res) {
 
     // Update last login
     user.lastLogin = new Date().toISOString();
-    users.set(formattedPhone, user);
+    storage.users.set(formattedPhone, user);
+    
+    console.log(`✅ Successful login: ${user.fullName} (${formattedPhone})`);
 
     res.json({
       success: true,
