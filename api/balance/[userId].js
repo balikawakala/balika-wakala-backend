@@ -1,4 +1,5 @@
-const users = new Map();
+// api/balance/[userId].js
+import { storage } from '../lib/storage';
 
 export default function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,7 +13,7 @@ export default function handler(req, res) {
   try {
     const { userId } = req.query;
     
-    const user = Array.from(users.values()).find(u => u.id === userId);
+    const user = Array.from(storage.users.values()).find(u => u.id === userId);
     if (!user) {
       return res.status(404).json({ 
         success: false,
